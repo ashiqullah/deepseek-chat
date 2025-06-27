@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  deepseek-api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    container_name: deepseek-api
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    volumes:
+      - ./backend/appsettings.json:/app/appsettings.json:ro
+    networks:
+      - deepseek-network
+    restart: unless-stopped
+
+  deepseek-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    container_name: deepseek-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - deepseek-api
+    networks:
+      - deepseek-network
+    restart: unless-stopped
+
+networks:
+  deepseek-network:
+    driver: bridge
+
+volumes:
+  api-data: 

@@ -1,0 +1,65 @@
+<div class="chat-container">
+  <div class="chat-header">
+    <h1>{{ title }}</h1>
+    <div class="connection-status" [class.connected]="isConnected" [class.disconnected]="!isConnected">
+      <span class="status-dot"></span>
+      {{ isConnected ? 'Connected' : 'Disconnected' }}
+    </div>
+    <button class="clear-btn" (click)="clearChat()" [disabled]="messages.length === 0">
+      Clear Chat
+    </button>
+  </div>
+
+  <div class="chat-messages" #chatContainer>
+    <div *ngIf="messages.length === 0" class="welcome-message">
+      <h2>Welcome to DeepSeek Chat!</h2>
+      <p>Start a conversation by typing your message below.</p>
+    </div>
+    
+    <div *ngFor="let message of messages" class="message" [class.user-message]="message.role === 'user'" [class.assistant-message]="message.role === 'assistant'">
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-role">{{ message.role === 'user' ? 'You' : 'Assistant' }}</span>
+          <span class="message-time">{{ message.timestamp | date:'short' }}</span>
+        </div>
+        <div class="message-text">{{ message.content }}</div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="message assistant-message">
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-role">Assistant</span>
+        </div>
+        <div class="message-text loading">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          Thinking...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <div class="input-container">
+      <textarea 
+        [(ngModel)]="currentMessage" 
+        (keydown)="onKeyPress($event)"
+        placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+        [disabled]="isLoading || !isConnected"
+        rows="1"
+        class="message-input">
+      </textarea>
+      <button 
+        class="send-btn" 
+        (click)="sendMessage()" 
+        [disabled]="!currentMessage.trim() || isLoading || !isConnected">
+        <span *ngIf="!isLoading">Send</span>
+        <span *ngIf="isLoading">Sending...</span>
+      </button>
+    </div>
+  </div>
+</div> 
