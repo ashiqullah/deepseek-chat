@@ -2,15 +2,18 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ChatRequest, ChatResponse, ChatMessage } from './models/chat.models';
-import { environment } from '../environments/environment';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl: string;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private config: ConfigService) {
+    this.apiUrl = this.config.apiUrl;
+    console.log(`ChatService initialized with API URL: ${this.apiUrl}`);
+  }
 
   sendMessage(request: ChatRequest): Observable<ChatResponse> {
     return this.http.post<ChatResponse>(`${this.apiUrl}/api/chat/send`, request);
@@ -25,6 +28,7 @@ export class ChatService {
   }
 
   healthCheck(): Observable<any> {
+    console.log(`Health check URL: ${this.apiUrl}/api/chat/health`);
     return this.http.get(`${this.apiUrl}/api/chat/health`);
   }
 } 

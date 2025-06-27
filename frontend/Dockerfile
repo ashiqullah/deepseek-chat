@@ -3,8 +3,8 @@ FROM --platform=$BUILDPLATFORM node:18-alpine AS build
 
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY package*.json ./
+# Copy package files from frontend directory
+COPY frontend/package*.json ./
 
 # Install ALL dependencies (including devDependencies for build)
 RUN npm ci
@@ -12,8 +12,8 @@ RUN npm ci
 # Install Angular CLI globally
 RUN npm install -g @angular/cli@17
 
-# Copy source code
-COPY . .
+# Copy frontend source code
+COPY frontend/ .
 
 # Build the Angular app
 RUN ng build --configuration production
@@ -25,7 +25,7 @@ FROM --platform=$TARGETPLATFORM nginx:alpine
 COPY --from=build /app/dist/deepseek-chat-frontend /usr/share/nginx/html
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
 EXPOSE 80

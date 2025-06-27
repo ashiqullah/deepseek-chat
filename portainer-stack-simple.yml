@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  deepseek-api:
+    image: mcr.microsoft.com/dotnet/aspnet:7.0
+    container_name: deepseek-api
+    working_dir: /app
+    command: >
+      sh -c "
+      apt-get update && 
+      apt-get install -y git curl &&
+      curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 7.0 &&
+      git clone https://github.com/ashiqullah/deepseek-chat.git /tmp/source &&
+      cp -r /tmp/source/backend/* /app/ &&
+      dotnet restore &&
+      dotnet run --urls=http://+:80
+      "
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - DeepSeek__ModelId=deepseek-chat
+      - DeepSeek__ApiKey=sk-4de054d548984d8b97b5f5e7d630b6a2
+      - DeepSeek__Endpoint=https://api.deepseek.com/v1/
+      - DeepSeek__ServiceId=deepseek
+    networks:
+      - deepseek-network
+    restart: unless-stopped
+
+  deepseek-frontend:
+    image: node:18-alpine
+    container_name: deepseek-frontend
+    working_dir: /app
+    command: >
+      sh -c "
+      apk add --no-cache git nginx &&
+      git clone https://github.com/ashiqullah/deepseek-chat.git /tmp/source &&
+      cp -r /tmp/source/frontend/* /app/ &&
+      npm ci &&
+      npm install -g @angular/cli@17 &&
+      ng build --configuration production &&
+      cp -r dist/deepseek-chat-frontend/* /usr/share/nginx/html/ &&
+      nginx -g 'daemon off;'
+      "
+    ports:
+      - "4200:80"
+    depends_on:
+      - deepseek-api
+    networks:
+      - deepseek-network
+    restart: unless-stopped
+
+networks:
+  deepseek-network:
+    driver: bridge 
