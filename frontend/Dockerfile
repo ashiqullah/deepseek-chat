@@ -3,17 +3,20 @@ FROM --platform=$BUILDPLATFORM node:18-alpine AS build
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including devDependencies for build)
+RUN npm ci
+
+# Install Angular CLI globally
+RUN npm install -g @angular/cli@17
 
 # Copy source code
 COPY . .
 
 # Build the Angular app
-RUN npm run build
+RUN ng build --configuration production
 
 # Production stage
 FROM --platform=$TARGETPLATFORM nginx:alpine

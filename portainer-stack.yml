@@ -4,7 +4,7 @@ services:
   deepseek-api:
     image: deepseek-api:latest
     build: 
-      context: https://github.com/your-username/your-repo.git#main:backend
+      context: https://github.com/ashiqullah/deepseek-chat.git#main:backend
       dockerfile: Dockerfile
     container_name: deepseek-api
     ports:
@@ -30,7 +30,7 @@ services:
   deepseek-frontend:
     image: deepseek-frontend:latest
     build:
-      context: https://github.com/your-username/your-repo.git#main:frontend
+      context: https://github.com/ashiqullah/deepseek-chat.git#main:frontend
       dockerfile: Dockerfile
     container_name: deepseek-frontend
     ports:
