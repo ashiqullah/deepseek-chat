@@ -9,12 +9,12 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 ARG TARGETARCH
 WORKDIR /src
 
-# Copy project file from backend directory
-COPY backend/DeepSeekChatApi.csproj ./
+# Copy project file (context is backend directory)
+COPY ["DeepSeekChatApi.csproj", "./"]
 RUN dotnet restore "DeepSeekChatApi.csproj" -a $TARGETARCH
 
-# Copy backend source code
-COPY backend/ .
+# Copy source code
+COPY . .
 RUN dotnet build "DeepSeekChatApi.csproj" -c Release -o /app/build -a $TARGETARCH
 
 FROM build AS publish

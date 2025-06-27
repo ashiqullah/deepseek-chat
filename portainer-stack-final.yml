@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  deepseek-api:
+    build: 
+      context: https://github.com/ashiqullah/deepseek-chat.git#main:backend
+      dockerfile: Dockerfile
+    container_name: deepseek-api
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - DeepSeek__ModelId=deepseek-chat
+      - DeepSeek__ApiKey=sk-4de054d548984d8b97b5f5e7d630b6a2
+      - DeepSeek__Endpoint=https://api.deepseek.com/v1/
+      - DeepSeek__ServiceId=deepseek
+    networks:
+      - deepseek-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  deepseek-frontend:
+    build:
+      context: https://github.com/ashiqullah/deepseek-chat.git#main:frontend
+      dockerfile: Dockerfile
+    container_name: deepseek-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - deepseek-api
+    networks:
+      - deepseek-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+networks:
+  deepseek-network:
+    driver: bridge
+
+volumes:
+  api-data: 
