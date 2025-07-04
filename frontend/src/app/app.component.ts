@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { ChatService } from './chat.service';
-import { ChatMessage, ChatRequest } from './models/chat.models';
+import { ChatMessage, ChatRequest, ModelProvider, ProviderInfo } from './models/chat.models';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +16,11 @@ export class AppComponent implements OnInit, AfterViewChecked {
   conversationId = '';
   isLoading = false;
   isConnected = false;
+  
+  // Provider selection
+  selectedProvider: ModelProvider = ModelProvider.DeepSeekAPI;
+  availableProviders: ProviderInfo[] = [];
+  ModelProvider = ModelProvider; // Make enum available in template
 
   constructor(private chatService: ChatService) {
     this.conversationId = this.generateConversationId();
@@ -23,6 +28,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   ngOnInit() {
     this.checkConnection();
+    this.loadProviders();
   }
 
   ngAfterViewChecked() {
@@ -41,8 +47,53 @@ export class AppComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  loadProviders() {
+    this.chatService.getProviderStatus().subscribe({
+      next: (response) => {
+        this.availableProviders = response.providers;
+        // Set default provider to first available one
+        const firstAvailable = this.availableProviders.find(p => p.available);
+        if (firstAvailable) {
+          this.selectedProvider = firstAvailable.value;
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load providers:', error);
+        // Fallback to default providers
+        this.availableProviders = [
+          { name: 'DeepSeek API', value: ModelProvider.DeepSeekAPI, available: true },
+          { name: 'Local Model', value: ModelProvider.LocalModel, available: false }
+        ];
+      }
+    });
+  }
+
+  onProviderChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    if (target) {
+      this.selectedProvider = parseInt(target.value) as ModelProvider;
+      // Optionally clear chat when switching providers
+      this.clearChat();
+    }
+  }
+
+  getProviderName(provider: ModelProvider): string {
+    const providerInfo = this.availableProviders.find(p => p.value === provider);
+    return providerInfo?.name || provider.toString();
+  }
+
+  isProviderAvailable(provider: ModelProvider): boolean {
+    const providerInfo = this.availableProviders.find(p => p.value === provider);
+    return providerInfo?.available || false;
+  }
+
   sendMessage() {
     if (!this.currentMessage.trim() || this.isLoading) {
+      return;
+    }
+
+    if (!this.isProviderAvailable(this.selectedProvider)) {
+      this.addErrorMessage(`Selected provider (${this.getProviderName(this.selectedProvider)}) is not available. Please select a different provider.`);
       return;
     }
 
@@ -57,7 +108,8 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
     const request: ChatRequest = {
       message: this.currentMessage,
-      conversationId: this.conversationId
+      conversationId: this.conversationId,
+      provider: this.selectedProvider
     };
 
     const messageToSend = this.currentMessage;

@@ -1,19 +1,42 @@
 <div class="chat-container">
   <div class="chat-header">
     <h1>{{ title }}</h1>
-    <div class="connection-status" [class.connected]="isConnected" [class.disconnected]="!isConnected">
-      <span class="status-dot"></span>
-      {{ isConnected ? 'Connected' : 'Disconnected' }}
+    <div class="header-controls">
+      <div class="provider-selector">
+        <label for="provider-select">Model Provider:</label>
+        <select 
+          id="provider-select" 
+          [(ngModel)]="selectedProvider" 
+          (change)="onProviderChange($event)"
+          class="provider-dropdown">
+          <option 
+            *ngFor="let provider of availableProviders" 
+            [value]="provider.value"
+            [disabled]="!provider.available"
+            [class.unavailable]="!provider.available">
+            {{ provider.name }} {{ !provider.available ? '(Unavailable)' : '' }}
+          </option>
+        </select>
+        <div class="provider-status" [class.available]="isProviderAvailable(selectedProvider)" [class.unavailable]="!isProviderAvailable(selectedProvider)">
+          <span class="status-indicator"></span>
+          {{ getProviderName(selectedProvider) }}
+        </div>
+      </div>
+      <div class="connection-status" [class.connected]="isConnected" [class.disconnected]="!isConnected">
+        <span class="status-dot"></span>
+        {{ isConnected ? 'Connected' : 'Disconnected' }}
+      </div>
+      <button class="clear-btn" (click)="clearChat()" [disabled]="messages.length === 0">
+        Clear Chat
+      </button>
     </div>
-    <button class="clear-btn" (click)="clearChat()" [disabled]="messages.length === 0">
-      Clear Chat
-    </button>
   </div>
 
   <div class="chat-messages" #chatContainer>
     <div *ngIf="messages.length === 0" class="welcome-message">
       <h2>Welcome to DeepSeek Chat!</h2>
       <p>Start a conversation by typing your message below.</p>
+      <p class="provider-info">Currently using: <strong>{{ getProviderName(selectedProvider) }}</strong></p>
     </div>
     
     <div *ngFor="let message of messages" class="message" [class.user-message]="message.role === 'user'" [class.assistant-message]="message.role === 'assistant'">
@@ -29,7 +52,7 @@
     <div *ngIf="isLoading" class="message assistant-message">
       <div class="message-content">
         <div class="message-header">
-          <span class="message-role">Assistant</span>
+          <span class="message-role">Assistant ({{ getProviderName(selectedProvider) }})</span>
         </div>
         <div class="message-text loading">
           <div class="typing-indicator">
@@ -49,14 +72,14 @@
         [(ngModel)]="currentMessage" 
         (keydown)="onKeyPress($event)"
         placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
-        [disabled]="isLoading || !isConnected"
+        [disabled]="isLoading || !isConnected || !isProviderAvailable(selectedProvider)"
         rows="1"
         class="message-input">
       </textarea>
       <button 
         class="send-btn" 
         (click)="sendMessage()" 
-        [disabled]="!currentMessage.trim() || isLoading || !isConnected">
+        [disabled]="!currentMessage.trim() || isLoading || !isConnected || !isProviderAvailable(selectedProvider)">
         <span *ngIf="!isLoading">Send</span>
         <span *ngIf="isLoading">Sending...</span>
       </button>

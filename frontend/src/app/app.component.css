@@ -26,6 +26,78 @@
   font-weight: 600;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Provider Selection */
+.provider-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.provider-selector label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.provider-dropdown {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.4rem 0.8rem;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.provider-dropdown:hover {
+  background: white;
+}
+
+.provider-dropdown:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.provider-dropdown option.unavailable {
+  color: #999;
+  font-style: italic;
+}
+
+.provider-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff4444;
+}
+
+.provider-status.available .status-indicator {
+  background: #4caf50;
+}
+
+.provider-status.unavailable .status-indicator {
+  background: #ff9800;
+}
+
 .connection-status {
   display: flex;
   align-items: center;
@@ -84,6 +156,16 @@
 .welcome-message h2 {
   color: #333;
   margin-bottom: 0.5rem;
+}
+
+.provider-info {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.provider-info strong {
+  color: #667eea;
 }
 
 .message {
@@ -244,6 +326,22 @@
 
   .chat-header h1 {
     font-size: 1.2rem;
+  }
+
+  .header-controls {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .provider-selector {
+    align-items: center;
+    width: 100%;
+  }
+
+  .provider-dropdown {
+    width: 100%;
+    max-width: 200px;
   }
 
   .message-content {

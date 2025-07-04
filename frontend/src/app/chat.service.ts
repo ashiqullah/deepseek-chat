@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ChatRequest, ChatResponse, ChatMessage } from './models/chat.models';
+import { ChatRequest, ChatResponse, ChatMessage, ProviderInfo } from './models/chat.models';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -25,6 +25,10 @@ export class ChatService {
 
   clearChatHistory(conversationId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/api/chat/history/${conversationId}`);
+  }
+
+  getProviderStatus(): Observable<{providers: ProviderInfo[]}> {
+    return this.http.get<{providers: ProviderInfo[]}>(`${this.apiUrl}/api/chat/providers`);
   }
 
   healthCheck(): Observable<any> {

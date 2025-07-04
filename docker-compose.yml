@@ -14,11 +14,22 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      # DeepSeek API Configuration
+      - DeepSeek__ModelId=deepseek-chat
+      - DeepSeek__ApiKey=sk-4de054d548984d8b97b5f5e7d630b6a2
+      - DeepSeek__Endpoint=https://api.deepseek.com/v1/
+      - DeepSeek__ServiceId=deepseek
+      # Local Model Configuration (points to Ollama service)
+      - DeepSeek__LocalModelEndpoint=http://ollama:11434/v1/
+      - DeepSeek__LocalModelId=deepseek-r1:latest
+      - DeepSeek__LocalServiceId=local-deepseek
     volumes:
       - ./backend/appsettings.json:/app/appsettings.json:ro
     networks:
       - deepseek-network
     restart: unless-stopped
+    depends_on:
+      - ollama
 
   deepseek-frontend:
     build:
@@ -36,9 +47,33 @@ services:
       - deepseek-network
     restart: unless-stopped
 
+  # Optional: Ollama service for local model support
+  # Remove or comment out if you don't want local model support
+  ollama:
+    image: ollama/ollama:latest
+    container_name: deepseek-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - deepseek-network
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    # Uncomment the following lines if you have NVIDIA GPU support
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
 networks:
   deepseek-network:
     driver: bridge
 
 volumes:
-  api-data: 
+  api-data:
+  ollama-data: 
